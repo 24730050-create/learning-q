@@ -83,7 +83,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     "전공 계열을 선택해주세요",
     "관심 과목을 선택해주세요",
     "선호하는 영상 길이를 선택하세요",
-    "요약 및 시작",
+    "주간 학습 목표를 설정하세요",
   ]
 
   const stepDescriptions = [
@@ -91,7 +91,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     "관련 분야의 학습 영상을 찾아드립니다.",
     "최대 3개까지 선택 가능",
     "학습 스타일에 맞게 선택하세요.",
-    "모든 선택 항목을 확인하고 시작하세요.",
+    "주당 몇 시간 학습할 계획인가요?",
   ]
 
   return (
@@ -211,36 +211,30 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             </div>
           )}
 
-          {/* Step 4: Summary */}
+          {/* Step 4: Weekly Goal */}
           {step === 4 && (
             <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-6">{stepTitles[4]}</h2>
-              <div className="space-y-4">
-                <div className="p-4 bg-blue-50 rounded-lg border border-[#E5E7EB]">
-                  <p className="text-xs text-gray-500 mb-1">학년</p>
-                  <p className="font-medium text-gray-900">{grade}</p>
+              <h2 className="text-xl font-bold text-gray-900 mb-1">{stepTitles[4]}</h2>
+              <p className="text-sm text-gray-500 mb-6">{stepDescriptions[4]}</p>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-medium text-gray-900">{weeklyGoal}시간</span>
+                  <span className="text-sm text-gray-500">/ 20시간</span>
                 </div>
-                <div className="p-4 bg-blue-50 rounded-lg border border-[#E5E7EB]">
-                  <p className="text-xs text-gray-500 mb-1">전공</p>
-                  <p className="font-medium text-gray-900">{major}</p>
-                </div>
-                <div className="p-4 bg-blue-50 rounded-lg border border-[#E5E7EB]">
-                  <p className="text-xs text-gray-500 mb-2">관심 과목</p>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedSubjects.map((subject) => (
-                      <span key={subject} className="px-3 py-1 bg-[#0EA5E9] text-white text-xs rounded-full">
-                        {subject}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div className="p-4 bg-blue-50 rounded-lg border border-[#E5E7EB]">
-                  <p className="text-xs text-gray-500 mb-1">선호 영상 길이</p>
-                  <p className="font-medium text-gray-900">{videoLength}</p>
-                </div>
-                <div className="p-4 bg-blue-50 rounded-lg border border-[#E5E7EB]">
-                  <p className="text-xs text-gray-500 mb-1">주간 학습 목표</p>
-                  <p className="font-medium text-gray-900">{weeklyGoal}시간</p>
+                <input
+                  type="range"
+                  min="1"
+                  max="20"
+                  value={weeklyGoal}
+                  onChange={(e) => setWeeklyGoal(Number.parseInt(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#0EA5E9]"
+                />
+                <div className="grid grid-cols-5 gap-2 text-center text-xs text-gray-500">
+                  <span>1</span>
+                  <span>5</span>
+                  <span>10</span>
+                  <span>15</span>
+                  <span>20</span>
                 </div>
               </div>
             </div>
