@@ -12,16 +12,17 @@ const iconMap = {
 }
 
 const labelMap = {
-  home: "Home",
-  dashboard: "Dashboard",
-  profile: "Profile",
+  home: "홈",
+  dashboard: "대시보드",
+  profile: "프로필",
 }
 
 export function BottomNavigation({ currentTab, onTabChange }: BottomNavigationProps) {
   const tabs = ["home", "dashboard", "profile"] as const
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border px-4 py-3 max-w-md mx-auto">
+    /* 반응형 디자인 - 모바일과 데스크탑 대응 */
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E5E7EB] px-4 py-3 max-w-md mx-auto shadow-lg">
       <div className="flex items-center justify-around">
         {tabs.map((tab) => {
           const isActive = currentTab === tab
@@ -30,7 +31,7 @@ export function BottomNavigation({ currentTab, onTabChange }: BottomNavigationPr
               key={tab}
               onClick={() => onTabChange(tab)}
               className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-all ${
-                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                isActive ? "text-[#0EA5E9] bg-blue-50" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
               }`}
             >
               <span className="text-xl">{iconMap[tab]}</span>

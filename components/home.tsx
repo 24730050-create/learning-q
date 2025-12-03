@@ -118,11 +118,10 @@ export function Home() {
   }
 
   return (
-    <div className="flex flex-col w-full h-full bg-background overflow-hidden">
-      <Header title="LearnFlow" />
+    <div className="flex flex-col w-full h-full bg-white overflow-hidden">
+      <Header title="러닝큐" />
 
-      {/* Filter Tabs */}
-      <div className="sticky top-0 z-10 bg-background border-b border-border px-4 pt-4">
+      <div className="sticky top-0 z-10 bg-white border-b border-[#E5E7EB] px-4 pt-4">
         <div className="flex gap-2 pb-3 overflow-x-auto scrollbar-hide">
           {filterOptions.map((option) => (
             <button
@@ -130,8 +129,8 @@ export function Home() {
               onClick={() => setFilterTab(option)}
               className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all ${
                 filterTab === option
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "bg-muted text-foreground hover:bg-muted/80"
+                  ? "bg-[#0EA5E9] text-white shadow-sm"
+                  : "bg-gray-100 text-gray-900 hover:bg-gray-200"
               }`}
             >
               {option}

@@ -38,17 +38,16 @@ export function Dashboard() {
   const maxValue = Math.max(...weeklyData.map((d) => Math.max(d.actual, d.goal)))
 
   return (
-    <div className="flex flex-col w-full h-full bg-background overflow-hidden">
-      <Header title="학습 대시보드" />
+    <div className="flex flex-col w-full h-full bg-white overflow-hidden">
+      <Header title="러닝큐 대시보드" />
 
       <div className="flex-1 overflow-y-auto scrollbar-hide px-4 py-4">
         <div className="space-y-4 pb-4">
-          {/* Timeframe Toggle */}
           <div className="flex gap-2 mb-4">
             <button
               onClick={() => setTimeframe("weekly")}
               className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all ${
-                timeframe === "weekly" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                timeframe === "weekly" ? "bg-[#0EA5E9] text-white" : "bg-gray-100 text-gray-900 hover:bg-gray-200"
               }`}
             >
               주간
@@ -56,127 +55,142 @@ export function Dashboard() {
             <button
               onClick={() => setTimeframe("monthly")}
               className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all ${
-                timeframe === "monthly" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                timeframe === "monthly" ? "bg-[#0EA5E9] text-white" : "bg-gray-100 text-gray-900 hover:bg-gray-200"
               }`}
             >
               월간
             </button>
           </div>
 
-          {/* Progress Stats */}
-          <Card className="p-4 shadow-sm">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-3">학습 진행률</h3>
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">
-                    {totalActual.toFixed(1)}h / {totalGoal}h
-                  </span>
-                  <span className="text-xs text-muted-foreground">{Math.round(progressPercent)}%</span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div
-                    className="bg-primary h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
+          <Card className="p-4 shadow-sm border border-[#E5E7EB] rounded-lg">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-gray-600">이번 주 학습 시간</h3>
+              <span className="text-2xl font-bold text-[#0EA5E9]">{totalActual.toFixed(1)}h</span>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs text-gray-600">
+                <span>주간 목표</span>
+                <span>{totalGoal}h</span>
               </div>
+              <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                <div
+                  className="bg-[#0EA5E9] h-3 rounded-full transition-all duration-300"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+              <div className="text-right text-xs text-gray-500">{Math.round(progressPercent)}% 달성</div>
             </div>
           </Card>
 
-          {/* Completed Videos */}
-          <Card className="p-4 shadow-sm">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-3">학습 활동</h3>
+          <Card className="p-4 shadow-sm border border-[#E5E7EB] rounded-lg">
+            <h3 className="text-sm font-semibold text-gray-600 mb-4">주간 목표 달성률</h3>
+            <div className="flex items-end justify-center h-32 gap-2 bg-gray-50 rounded-lg p-4">
+              {weeklyData.map((day) => {
+                const percentage = (day.actual / day.goal) * 100
+                return (
+                  <div key={day.name} className="flex flex-col items-center gap-2 flex-1">
+                    <div className="w-full bg-gray-200 rounded-t-lg overflow-hidden" style={{ height: "80px" }}>
+                      <div
+                        className="bg-[#0EA5E9] rounded-t-lg transition-all duration-300 w-full"
+                        style={{ height: `${Math.min(percentage, 100)}%` }}
+                      />
+                    </div>
+                    <span className="text-xs font-medium text-gray-600">{day.name}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </Card>
+
+          <Card className="p-4 shadow-sm border border-[#E5E7EB] rounded-lg">
+            <h3 className="text-sm font-semibold text-gray-600 mb-4">학습 활동</h3>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-3xl font-bold text-primary">{completedVideos}</p>
-                <p className="text-xs text-muted-foreground mt-1">영상 완료</p>
+              <div className="p-4 bg-blue-50 rounded-lg text-center">
+                <p className="text-3xl font-bold text-[#0EA5E9]">{completedVideos}</p>
+                <p className="text-xs text-gray-600 mt-2">완료한 영상</p>
               </div>
-              <div>
-                <p className="text-3xl font-bold text-secondary">{likedVideos}</p>
-                <p className="text-xs text-muted-foreground mt-1">영상 좋아요</p>
+              <div className="p-4 bg-purple-50 rounded-lg text-center">
+                <p className="text-3xl font-bold text-[#8B5CF6]">{likedVideos}</p>
+                <p className="text-xs text-gray-600 mt-2">좋아요한 영상</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-4 shadow-sm">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-4">일일 학습 시간</h3>
+          <Card className="p-4 shadow-sm border border-[#E5E7EB] rounded-lg">
+            <h3 className="text-sm font-semibold text-gray-600 mb-4">일별 학습 시간</h3>
             <div className="space-y-3">
               {weeklyData.map((day) => (
                 <div key={day.name}>
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs font-medium text-foreground">{day.name}</span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs font-medium text-gray-700">{day.name}</span>
+                    <span className="text-xs text-gray-500">
                       {day.actual}h / {day.goal}h
                     </span>
                   </div>
-                  <div className="flex gap-1 h-6 bg-muted rounded-md overflow-hidden">
+                  <div className="flex gap-1 h-6 bg-gray-100 rounded-md overflow-hidden">
                     <div
-                      className="bg-primary rounded-l transition-all"
+                      className="bg-[#0EA5E9] rounded-l transition-all"
                       style={{ width: `${(day.actual / maxValue) * 100}%` }}
                     />
-                    <div
-                      className="bg-secondary/40"
-                      style={{ width: `${((day.goal - day.actual) / maxValue) * 100}%` }}
-                    />
+                    <div className="bg-gray-300" style={{ width: `${((day.goal - day.actual) / maxValue) * 100}%` }} />
                   </div>
                 </div>
               ))}
             </div>
           </Card>
 
-          <Card className="p-4 shadow-sm">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-4">과목별 학습</h3>
+          <Card className="p-4 shadow-sm border border-[#E5E7EB] rounded-lg">
+            <h3 className="text-sm font-semibold text-gray-600 mb-4">과목별 학습</h3>
             <div className="space-y-4">
               <div className="flex h-24 gap-1 rounded-lg overflow-hidden">
-                {subjectData.map((subject, index) => (
-                  <div
-                    key={subject.name}
-                    className={`${index === 0 ? "bg-primary" : index === 1 ? "bg-secondary" : "bg-cyan-400"} rounded-sm transition-all`}
-                    style={{ width: `${subject.value}%` }}
-                  />
-                ))}
+                {subjectData.map((subject, index) => {
+                  const colors = ["bg-[#0EA5E9]", "bg-[#8B5CF6]", "bg-cyan-400"]
+                  return (
+                    <div
+                      key={subject.name}
+                      className={`${colors[index]} rounded-sm transition-all`}
+                      style={{ width: `${subject.value}%` }}
+                    />
+                  )
+                })}
               </div>
               <div className="space-y-2">
-                {subjectData.map((subject, index) => (
-                  <div key={subject.name} className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`w-2 h-2 rounded-full ${
-                          index === 0 ? "bg-primary" : index === 1 ? "bg-secondary" : "bg-cyan-400"
-                        }`}
-                      />
-                      <span className="text-foreground">{subject.name}</span>
+                {subjectData.map((subject, index) => {
+                  const colors = ["bg-[#0EA5E9]", "bg-[#8B5CF6]", "bg-cyan-400"]
+                  return (
+                    <div key={subject.name} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${colors[index]}`} />
+                        <span className="text-gray-700">{subject.name}</span>
+                      </div>
+                      <span className="text-gray-500 font-medium">{subject.value}%</span>
                     </div>
-                    <span className="text-muted-foreground">{subject.value}%</span>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           </Card>
 
-          {/* Top Categories */}
-          <Card className="p-4 shadow-sm">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-4">상위 3개 카테고리</h3>
+          <Card className="p-4 shadow-sm border border-[#E5E7EB] rounded-lg">
+            <h3 className="text-sm font-semibold text-gray-600 mb-4">상위 3개 카테고리</h3>
             <div className="space-y-3">
               {topCategories.map((category) => (
                 <div key={category.rank} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/20 text-primary font-semibold text-xs">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#0EA5E9]/20 text-[#0EA5E9] font-semibold text-xs">
                       {category.rank}
                     </div>
-                    <p className="text-sm font-medium">{category.name}</p>
+                    <p className="text-sm font-medium text-gray-900">{category.name}</p>
                   </div>
-                  <p className="text-xs text-muted-foreground font-medium">{category.hours}h</p>
+                  <p className="text-xs text-gray-500 font-medium">{category.hours}h</p>
                 </div>
               ))}
             </div>
           </Card>
 
-          {/* Satisfaction Message */}
-          <Card className="p-4 bg-gradient-to-r from-primary/10 to-secondary/10 shadow-sm">
-            <p className="text-sm font-semibold text-foreground text-center">우수한 학습 루틴 유지 중</p>
-            <p className="text-xs text-muted-foreground text-center mt-1">계속 이렇게 멋진 진행률을 유지하세요!</p>
+          <Card className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 shadow-sm border border-[#E5E7EB] rounded-lg">
+            <p className="text-sm font-semibold text-gray-900 text-center">우수한 학습 루틴 유지 중</p>
+            <p className="text-xs text-gray-600 text-center mt-1">멋진 진행률을 계속 유지하세요!</p>
           </Card>
         </div>
       </div>
