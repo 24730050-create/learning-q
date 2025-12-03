@@ -39,7 +39,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col w-full h-screen bg-background">
+    <div className="flex flex-col w-screen h-screen bg-white overflow-hidden">
       <div className="flex-1 overflow-hidden">
         <div className="w-full h-full">
           {currentTab === "home" && <Home />}
@@ -47,7 +47,9 @@ export default function App() {
           {currentTab === "profile" && <Profile />}
         </div>
       </div>
-      <BottomNavigation currentTab={currentTab} onTabChange={setCurrentTab} />
+      <div className="flex-shrink-0 border-t border-[#E5E7EB]">
+        <BottomNavigation currentTab={currentTab} onTabChange={setCurrentTab} />
+      </div>
     </div>
   )
 }

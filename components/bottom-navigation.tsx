@@ -21,8 +21,7 @@ export function BottomNavigation({ currentTab, onTabChange }: BottomNavigationPr
   const tabs = ["home", "dashboard", "profile"] as const
 
   return (
-    /* 반응형 디자인 - 모바일과 데스크탑 대응 */
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E5E7EB] px-4 py-3 max-w-md mx-auto shadow-lg">
+    <nav className="w-full bg-white border-t border-[#E5E7EB] px-4 py-3">
       <div className="flex items-center justify-around">
         {tabs.map((tab) => {
           const isActive = currentTab === tab

@@ -15,7 +15,6 @@ interface UserProfile {
 
 export function Profile() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [isEditing, setIsEditing] = useState(false)
 
   useEffect(() => {
     const savedProfile = localStorage.getItem("userProfile")
@@ -31,10 +30,6 @@ export function Profile() {
     }
   }
 
-  const handleEditProfile = () => {
-    setIsEditing(true)
-  }
-
   if (!profile) {
     return (
       <div className="flex items-center justify-center w-full h-full bg-white">
@@ -47,29 +42,22 @@ export function Profile() {
     <div className="flex flex-col w-full h-full bg-white overflow-hidden">
       <Header title="프로필" />
 
-      <div className="flex-1 overflow-y-auto scrollbar-hide px-4 py-4">
-        <div className="space-y-4 pb-4">
+      <div className="flex-1 overflow-y-auto scrollbar-hide">
+        <div className="px-4 py-4 pb-6 space-y-4">
+          {/* Profile header */}
           <Card className="p-6 bg-gradient-to-br from-blue-50 to-purple-50 shadow-sm border border-[#E5E7EB] rounded-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="w-12 h-12 rounded-full bg-[#0EA5E9]/20 flex items-center justify-center mb-3">
-                  <span className="text-2xl">👤</span>
-                </div>
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-[#0EA5E9]/20 flex items-center justify-center flex-shrink-0">
+                <span className="text-3xl">👤</span>
+              </div>
+              <div className="flex-1">
                 <h2 className="text-lg font-bold text-gray-900">{profile.grade}</h2>
                 <p className="text-sm text-gray-600">{profile.major} 전공</p>
               </div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleEditProfile}
-                className="flex items-center gap-2 bg-white border-[#E5E7EB]"
-              >
-                ✏️ 수정
-              </Button>
             </div>
           </Card>
 
-          {/* Profile Information */}
+          {/* Academic info */}
           <Card className="p-4 shadow-sm border border-[#E5E7EB] rounded-lg">
             <h3 className="text-sm font-semibold text-gray-600 mb-4">학과 정보</h3>
             <div className="space-y-4">
@@ -84,7 +72,7 @@ export function Profile() {
             </div>
           </Card>
 
-          {/* Learning Preferences */}
+          {/* Learning preferences */}
           <Card className="p-4 shadow-sm border border-[#E5E7EB] rounded-lg">
             <h3 className="text-sm font-semibold text-gray-600 mb-4">학습 선호도</h3>
             <div className="space-y-4">
@@ -102,14 +90,14 @@ export function Profile() {
             </div>
           </Card>
 
-          {/* Interest Subjects */}
+          {/* Interest subjects */}
           <Card className="p-4 shadow-sm border border-[#E5E7EB] rounded-lg">
             <h3 className="text-sm font-semibold text-gray-600 mb-4">관심 과목</h3>
             <div className="flex flex-wrap gap-2">
               {profile.subjects.map((subject) => (
                 <div
                   key={subject}
-                  className="px-3 py-1 rounded-full bg-[#0EA5E9]/20 text-[#0EA5E9] text-xs font-medium"
+                  className="px-3 py-1.5 rounded-full bg-[#0EA5E9]/20 text-[#0EA5E9] text-xs font-medium"
                 >
                   {subject}
                 </div>
@@ -122,21 +110,21 @@ export function Profile() {
             <h3 className="text-sm font-semibold text-gray-600 mb-4">통계</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-blue-50 rounded-lg text-center">
-                <p className="text-2xl font-bold text-[#0EA5E9]">42</p>
-                <p className="text-xs text-gray-600 mt-1">총 시청한 영상</p>
+                <p className="text-3xl font-bold text-[#0EA5E9]">42</p>
+                <p className="text-xs text-gray-600 mt-2">총 시청한 영상</p>
               </div>
               <div className="p-4 bg-purple-50 rounded-lg text-center">
-                <p className="text-2xl font-bold text-[#8B5CF6]">15</p>
-                <p className="text-xs text-gray-600 mt-1">좋아요한 영상</p>
+                <p className="text-3xl font-bold text-[#8B5CF6]">15</p>
+                <p className="text-xs text-gray-600 mt-2">좋아요한 영상</p>
               </div>
             </div>
           </Card>
 
-          {/* Logout Button */}
+          {/* Logout button */}
           <Button
             variant="destructive"
             onClick={handleLogout}
-            className="w-full mt-6 flex items-center justify-center gap-2"
+            className="w-full flex items-center justify-center gap-2 py-2"
           >
             🚪 로그아웃
           </Button>
