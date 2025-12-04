@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>러닝큐 - 자동 추천 통합 버전</title>
+
+  <style>
+    /* ====== (원본 index1.html 스타일 유지) ====== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #ffffff; color: #1f2937; }
+    .app-container { display:flex; flex-direction:column; width:100%; height:100vh; overflow:hidden; }
+    .content-area { flex:1; overflow-y:auto; overflow-x:hidden; }
+    .nav-bar { flex-shrink:0; border-top:1px solid #e5e7eb; background-color:#ffffff; padding:0.75rem 1rem; }
+    /* Onboarding */
+    .onboarding-screen { width:100%; min-height:100vh; background-color:#ffffff; overflow-y:auto; padding-bottom:2rem; }
+    .onboarding-container { max-width:28rem; margin:0 auto; padding:0 1rem; padding-top:3rem; }
+    .onboarding-logo { text-align:center; margin-bottom:3rem; }
+    .logo-content { display:flex; align-items:center; justify-content:center; gap:0.5rem; margin-bottom:0.75rem; }
+    .logo-emoji { font-size:2rem; }
+    .logo-text { font-size:1.875rem; font-weight:700; color:#0ea5e9; }
+    .logo-tagline { color:#4b5563; font-size:0.875rem; }
+    .progress-bar { display:flex; gap:0.5rem; margin-bottom:2rem; }
+    .progress-step { flex:1; height:0.5rem; border-radius:9999px; background-color:#e5e7eb; transition:all .3s; }
+    .progress-step.active { background-color:#0ea5e9; }
+    .card { padding:1.5rem; border:1px solid #e5e7eb; border-radius:0.75rem; background-color:#ffffff; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+    .step-title { font-size:1.25rem; font-weight:700; color:#111827; margin-bottom:0.25rem; }
+    .step-description { font-size:0.875rem; color:#6b7280; margin-bottom:1.5rem; }
+    .option-button { width:100%; padding:1rem; border-radius:0.5rem; border:2px solid #e5e7eb; background-color:#ffffff; text-align:left; font-weight:500; color:#111827; cursor:pointer; transition:all .2s; margin-bottom:.75rem; }
+    .option-button:hover { border-color: rgba(14,165,233,.5); }
+    .option-button.selected { border-color:#0ea5e9; background-color:#eff6ff; color:#0ea5e9; }
+    .option-button-secondary { color:#6b7280; font-size:0.75rem; margin-top:0.25rem; }
+    .chip-container { display:flex; flex-wrap:wrap; gap:0.5rem; }
+    .chip { padding:.5rem 1rem; border-radius:9999px; font-size:.875rem; font-weight:500; background-color:#f3f4f6; color:#111827; cursor:pointer; border:none; transition:all .2s; }
+    .chip:hover { background-color:#e5e7eb; }
+    .chip.selected { background-color:#0ea5e9; color:#ffffff; }
+    .chip.disabled { opacity:.5; cursor:not-allowed; }
+    .slider-container { display:flex; flex-direction:column; gap:1.5rem; }
+    .slider-display { display:flex; align-items:center; justify-content:space-between; }
+    .slider-value { font-size:1.125rem; font-weight:500; color:#111827; }
+    input[type="range"] { width:100%; height:.5rem; border-radius:9999px; background:#e5e7eb; outline:none; -webkit-appearance:none; accent-color:#0ea5e9; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:1.25rem; height:1.25rem; border-radius:50%; background:#0ea5e9; cursor:pointer; }
+    .button-group { display:flex; gap:.75rem; margin-top:2rem; }
+    .btn { flex:1; padding:.75rem; border:none; border-radius:.5rem; font-weight:500; font-size:.875rem; cursor:pointer; transition:all .2s; }
+    .btn-primary { background:#0ea5e9; color:#fff; }
+    .btn-secondary { background:#f3f4f6; color:#111827; border:1px solid #e5e7eb; }
+    .btn:disabled { opacity:.5; cursor:not-allowed; }
+    /* Header */
+    .header { position:sticky; top:0; z-index:20; background:#fff; border-bottom:1px solid #e5e7eb; padding:1rem; display:flex; align-items:center; justify-content:space-between; }
+    .header-content { display:flex; align-items:center; gap:.5rem; }
+    .header-emoji { font-size:1.5rem; }
+    .header-title { font-size:1.25rem; font-weight:700; color:#0ea5e9; }
+    /* Filters */
+    .filter-tabs { position:sticky; top:4rem; z-index:10; background:#fff; border-bottom:1px solid #e5e7eb; padding:.75rem 1rem; display:flex; gap:.5rem; overflow-x:auto; scroll-behavior:smooth; }
+    .filter-tab { padding:.5rem 1rem; border-radius:9999px; white-space:nowrap; font-size:.875rem; font-weight:500; background:#f3f4f6; color:#111827; border:none; cursor:pointer; transition:all .2s; }
+    .filter-tab:hover { background:#e5e7eb; }
+    .filter-tab.active { background:#0ea5e9; color:#fff; box-shadow:0 1px 2px rgba(0,0,0,.1); }
+    /* Video Card */
+    .video-card { border:1px solid #e5e7eb; border-radius:.5rem; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.1); transition:box-shadow .2s; overflow:hidden; margin-bottom:1rem; }
+    .video-card:hover { box-shadow:0 4px 6px rgba(0,0,0,.1); }
+    .video-thumbnail { position:relative; width:100%; aspect-ratio:16/9; overflow:hidden; background:#e5e7eb; }
+    .video-thumbnail img { width:100%; height:100%; object-fit:cover; }
+    .play-overlay { position:absolute; inset:0; background:rgba(0,0,0,0); display:flex; align-items:center; justify-content:center; opacity:0; transition:all .2s; }
+    .video-thumbnail:hover .play-overlay { background:rgba(0,0,0,.3); opacity:1; }
+    .play-button { padding:.75rem; border-radius:9999px; background:rgba(14,165,233,.9); color:#fff; font-size:1.25rem; border:none; cursor:pointer; transition:background-color .2s; }
+    .play-button:hover { background:#0ea5e9; }
+    .video-duration { position:absolute; top:.5rem; right:.5rem; background:rgba(0,0,0,.7); color:#fff; font-size:.75rem; padding:.25rem .5rem; border-radius:.25rem; font-weight:500; }
+    .video-content { padding:1rem; display:flex; flex-direction:column; gap:.75rem; }
+    .video-meta { display:flex; align-items:center; justify-content:space-between; font-size:.75rem; color:#6b7280; }
+    .video-title { font-size:.875rem; font-weight:600; color:#111827; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .video-badge { display:flex; align-items:center; gap:.25rem; font-size:.875rem; color:#0ea5e9; }
+    .video-summary-box { background:#f9fafb; padding:.75rem; border-radius:.5rem; border:1px solid #e5e7eb; }
+    .summary-toggle { font-size:.75rem; font-weight:600; color:#4b5563; background:none; border:none; cursor:pointer; padding:0; display:flex; align-items:center; gap:.25rem; transition:color .2s; }
+    .summary-toggle:hover { color:#0ea5e9; }
+    .summary-text { font-size:.75rem; color:#374151; margin-top:.5rem; line-height:1.5; white-space:pre-wrap; display:none; }
+    .video-actions { display:flex; align-items:center; justify-content:space-between; padding-top:.5rem; border-top:1px solid #e5e7eb; gap:.5rem; }
+    .like-button { display:flex; align-items:center; gap:.25rem; padding:.5rem .75rem; border-radius:.5rem; font-size:.875rem; font-weight:500; border:none; cursor:pointer; transition:all .2s; background:#f3f4f6; color:#374151; }
+    .like-button.liked { background:#fce7f3; color:#ec4899; }
+    .like-button:hover { background:#e5e7eb; }
+    .watch-button { flex:1; padding:.5rem .75rem; background:#0ea5e9; color:#fff; border:none; border-radius:.5rem; font-size:.875rem; font-weight:500; cursor:pointer; transition:background-color .2s; margin-left:.5rem; }
+    .watch-button:hover { background:#0284c7; }
+    /* Modal / Player */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:50; padding:1rem; }
+    .modal-content { background:#fff; border-radius:.75rem; width:100%; max-width:42rem; max-height:90vh; overflow-y:auto; box-shadow:0 20px 25px rgba(0,0,0,.15); }
+    .modal-header { display:flex; align-items:center; justify-content:space-between; padding:1rem; border-bottom:1px solid #e5e7eb; position:sticky; top:0; background:#fff; }
+    .modal-close-button { background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0; width:2rem; height:2rem; display:flex; align-items:center; justify-content:center; border-radius:.5rem; transition:background-color .2s; }
+    .modal-close-button:hover { background:#f3f4f6; }
+    .modal-body { padding:1rem; }
+    .youtube-embed { position:relative; width:100%; padding-bottom:56.25%; height:0; overflow:hidden; background:#000; border-radius:.5rem; margin-bottom:1rem; }
+    .youtube-embed iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:none; }
+    .video-info { display:flex; flex-direction:column; gap:.75rem; }
+    .video-info-title { font-size:1.125rem; font-weight:600; color:#111827; }
+    .video-info-detail { font-size:.875rem; color:#6b7280; }
+    /* Dashboard / Profile (원본 유지) */
+    .dashboard-container { display:flex; flex-direction:column; gap:1rem; padding:1rem; padding-bottom:5rem; }
+    .stat-card { background:#fff; border:1px solid #e5e7eb; border-radius:.5rem; padding:1rem; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+    .stat-card-title { font-size:.875rem; font-weight:600; color:#4b5563; margin-bottom:1rem; }
+    .stat-value { font-size:2rem; font-weight:700; color:#0ea5e9; display:flex; align-items:baseline; gap:.5rem; }
+    .stat-unit { font-size:.875rem; color:#6b7280; font-weight:400; }
+    .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .stat-grid-item { padding:1rem; border-radius:.5rem; text-align:center; }
+    .stat-grid-item.blue { background:#eff6ff; }
+    .stat-grid-item.purple { background:#faf5ff; }
+    .stat-grid-item-number { font-size:1.875rem; font-weight:700; color:#0ea5e9; margin-bottom:.5rem; }
+    .stat-grid-item-label { font-size:.75rem; color:#4b5563; margin-top:.5rem; }
+    .history-list { max-height:12rem; overflow-y:auto; display:flex; flex-direction:column; gap:.5rem; }
+    .history-item { display:flex; align-items:center; justify-content:space-between; padding:.5rem; background:#f9fafb; border-radius:.25rem; font-size:.75rem; }
+    .history-item-title { font-weight:500; color:#111827; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+    .history-item-date { color:#6b7280; margin-top:.25rem; font-size:.75rem; }
+    .history-item-time { font-weight:500; color:#0ea5e9; margin-left:.5rem; }
+    .motivation-banner { background:linear-gradient(to right,#eff6ff,#faf5ff); padding:1rem; border-radius:.5rem; border:1px solid #e5e7eb; text-align:center; }
+    .motivation-title { font-size:.875rem; font-weight:600; color:#111827; }
+    .motivation-subtitle { font-size:.75rem; color:#4b5563; margin-top:.25rem; }
+    .profile-container { display:flex; flex-direction:column; gap:1rem; padding:1rem; padding-bottom:5rem; }
+    .logout-button { background:#f3f4f6; color:#111827; padding:.75rem; border:1px solid #e5e7eb; border-radius:.5rem; font-weight:500; cursor:pointer; transition:all .2s; width:100%; }
+    .logout-button:hover { background:#e5e7eb; }
+    .bottom-nav { display:flex; align-items:center; justify-content:space-around; padding:.75rem 1rem; background:#fff; }
+    .nav-item { display:flex; flex-direction:column; align-items:center; gap:.25rem; padding:.5rem 1rem; border-radius:.5rem; background:none; border:none; cursor:pointer; font-size:0; transition:all .2s; }
+    .nav-item-icon { font-size:1.25rem; display:block; }
+    .nav-item-label { font-size:.75rem; font-weight:500; color:#4b5563; display:block; }
+    .nav-item.active { background:#eff6ff; color:#0ea5e9; }
+    .nav-item.active .nav-item-label { color:#0ea5e9; }
+    .scrollbar-hide { -ms-overflow-style:none; scrollbar-width:none; }
+    .scrollbar-hide::-webkit-scrollbar { display:none; }
+    .hidden { display:none; }
+    @media (max-width:768px) { .onboarding-container { padding-top:2rem; padding-bottom:1rem; } .logo-text { font-size:1.5rem; } .stat-value { font-size:1.5rem; } }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div id="app" class="content-area"></div>
+    <div class="nav-bar">
+      <nav class="bottom-nav">
+        <button class="nav-item active" data-tab="home">
+          <span class="nav-item-icon">🏠</span>
+          <span class="nav-item-label">홈</span>
+        </button>
+        <button class="nav-item" data-tab="dashboard">
+          <span class="nav-item-icon">📊</span>
+          <span class="nav-item-label">대시보드</span>
+        </button>
+        <button class="nav-item" data-tab="profile">
+          <span class="nav-item-icon">👤</span>
+          <span class="nav-item-label">프로필</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <script>
+    /************************************************************************
+     * 통합 JS - 기존 index1 UI 유지 + YouTube API 자동 추천 통합
+     *
+     * 동작 요약:
+     * - 온보딩(5단계)은 기존 UI 유지하되 3번째(관심과목) 칩 방식으로 사용.
+     * - 온보딩 완료 시: localStorage에 userProfile 저장 → buildRecommendations 호출
+     * - buildRecommendations: 관심과목마다 YouTube Data API로 검색 후
+     *   각 과목당 쇼츠(<=3분) 1개, 중간(3~20분) 1개, 장편(>20분) 1개 선택
+     * - 추천 목록은 appState.recommendations 에 저장 → 홈에서 사용
+     * - 재생/좋아요/학습기록/대시보드 로직은 기존 방식 유지
+     *
+     * 필수: 아래 YT_API_KEY에 네 API 키 넣기
+     ************************************************************************/
+
+    // --------------------- YouTube API key (여기에 네 키 넣기) ---------------------
+    const YT_API_KEY = "AIzaSyBxtNDY1QDZ4dK6z6-xARt8hnB3QCxp9pw"; // <<<<<<<<<<<<<< 여기에 넣어야 동작합니다.
+    // -------------------------------------------------------------------------------
+
+    // helper: ISO8601 duration -> seconds
+    function parseISODuration(iso) {
+      // 예: PT1H2M10S, PT15M, PT20S, PT2H
+      const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+      if (!m) return 0;
+      const h = parseInt(m[1] || 0, 10);
+      const min = parseInt(m[2] || 0, 10);
+      const s = parseInt(m[3] || 0, 10);
+      return h * 3600 + min * 60 + s;
+    }
+
+    // length helpers
+    const isShort = sec => sec <= 180;          // <=3분
+    const isMid   = sec => sec > 180 && sec <= 1200; // 3~20분
+    const isLong  = sec => sec > 1200;          // >20분
+
+    // 관심과목 -> 검색 키워드 (간단 매핑)
+    const subjectToKeyword = {
+      "Python 프로그래밍": "python programming tutorial",
+      "자료구조": "data structure tutorial",
+      "알고리즘": "algorithm tutorial",
+      "미적분": "calculus derivative lecture",
+      "영어 회화": "english speaking practice",
+      "생물학": "biology basics lecture",
+      "역사": "world history summary",
+      "물리학": "physics lecture basics",
+      "화학": "chemistry basics lecture",
+      "웹 개발": "web development tutorial"
+    };
+
+    // 기존 static youtubeVideos (원본에 있던 10개) - 유지하되 추천 생성에는 사용하지 않음
+    const staticVideos = [
+      // (원본 10개 그대로 유지 as backup) ...
+      // 여기서는 파일 처음에 있던 배열을 크게 복사하지 않음(원본 UI에 이미 포함되어 있었음).
+      // 대신 fallback이 필요하면 여기에 채워서 사용 가능.
+    ];
+
+    // App state
+    let appState = {
+      currentTab: 'home',
+      hasProfile: false,
+      onboardingStep: 0,
+      userProfile: null,
+      likedVideos: JSON.parse(localStorage.getItem('likedVideos') || "[]"),
+      learningStats: JSON.parse(localStorage.getItem('learningStats') || "null"),
+      filterTab: '전체',
+      recommendations: [] // api 기반 추천 결과 (objects with keys: id, youtubeId, title, thumbnail, durationSec, length, likes, channelName, uploadedDate, summary)
+    };
+
+    // Utility: generate synthetic id for API-sourced videos (so we can like/save)
+    function genId(prefix = 'r') {
+      return prefix + '_' + Math.random().toString(36).substring(2,9);
+    }
+
+    // Load profile & initialize
+    function loadUserProfile() {
+      const saved = localStorage.getItem('userProfile');
+      if (saved) {
+        appState.hasProfile = true;
+        appState.userProfile = JSON.parse(saved);
+      }
+      const liked = localStorage.getItem('likedVideos');
+      if (liked) appState.likedVideos = JSON.parse(liked);
+      const stats = localStorage.getItem('learningStats');
+      if (stats) appState.learningStats = JSON.parse(stats);
+    }
+
+    // YouTube Data API: search + videos.detail
+    async function fetchVideosByKeyword(keyword) {
+      if (!YT_API_KEY || YT_API_KEY === "YOUR_API_KEY_HERE") {
+        console.warn("YT_API_KEY not set - fetchVideosByKeyword will return empty. Set YT_API_KEY to use live search.");
+        return [];
+      }
+
+      const searchURL = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=15&q=${encodeURIComponent(keyword)}&key=${YT_API_KEY}`;
+      try {
+        const r = await fetch(searchURL);
+        const data = await r.json();
+        if (!data || !data.items) return [];
+        const ids = data.items.map(i => i.id.videoId).filter(Boolean).join(',');
+        if (!ids) return [];
+
+        const detailURL = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,statistics&id=${ids}&key=${YT_API_KEY}`;
+        const r2 = await fetch(detailURL);
+        const d2 = await r2.json();
+        if (!d2 || !d2.items) return [];
+
+        return d2.items.map((v) => {
+          const durationSec = parseISODuration(v.contentDetails.duration || "PT0S");
+          return {
+            id: genId('yt'), // synthetic id
+            youtubeId: v.id,
+            title: v.snippet.title,
+            thumbnail: v.snippet.thumbnails?.high?.url || v.snippet.thumbnails?.default?.url || '',
+            durationSec,
+            durationMin: Math.max(1, Math.round(durationSec / 60)), // minutes for display/storage
+            length: isShort(durationSec) ? 'short-form' : (isMid(durationSec) ? 'mid-form' : 'long-form'),
+            likes: v.statistics?.likeCount ? parseInt(v.statistics.likeCount,10) : 0,
+            channelName: v.snippet.channelTitle,
+            uploadedDate: v.snippet.publishedAt ? v.snippet.publishedAt.slice(0,10) : '',
+            summary: v.snippet.description ? v.snippet.description.slice(0,400) : ''
+          };
+        });
+      } catch (e) {
+        console.error("YouTube fetch error:", e);
+        return [];
+      }
+    }
+
+    // Build recommendations: per subject pick short/mid/long one each
+    async function buildRecommendations(subjects) {
+      const recs = [];
+      for (const s of subjects) {
+        const keyword = subjectToKeyword[s] || s;
+        const list = await fetchVideosByKeyword(keyword);
+        if (!list || list.length === 0) continue;
+
+        // choose first matching each length
+        const short = list.find(v => v.length === 'short-form');
+        const mid = list.find(v => v.length === 'mid-form');
+        const long = list.find(v => v.length === 'long-form');
+
+        if (short) recs.push(short);
+        if (mid) recs.push(mid);
+        if (long) recs.push(long);
+      }
+
+      // ensure unique youtubeId
+      const unique = [];
+      const seen = new Set();
+      recs.forEach(v => {
+        if (!seen.has(v.youtubeId)) {
+          seen.add(v.youtubeId);
+          unique.push(v);
+        }
+      });
+      appState.recommendations = unique;
+      return unique;
+    }
+
+    // Render router
+    function initApp() {
+      loadUserProfile();
+      setupEventListeners();
+      renderScreen();
+    }
+
+    function setupEventListeners() {
+      // bottom nav
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const tab = e.currentTarget.dataset.tab;
+          appState.currentTab = tab;
+          document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+          e.currentTarget.classList.add('active');
+          renderScreen();
+        });
+      });
+    }
+
+    function renderScreen() {
+      const app = document.getElementById('app');
+      if (!appState.hasProfile) {
+        app.innerHTML = renderOnboarding();
+        setupOnboardingListeners();
+      } else if (appState.currentTab === 'home') {
+        app.innerHTML = renderHome();
+        setupHomeListeners();
+      } else if (appState.currentTab === 'dashboard') {
+        app.innerHTML = renderDashboard();
+      } else if (appState.currentTab === 'profile') {
+        app.innerHTML = renderProfile();
+        setupProfileListeners();
+      }
+    }
+
+    /***********************
+     * Onboarding (원본 유지, 단 subjects step에 chip 방식 사용)
+     ***********************/
+    function renderOnboarding() {
+      const grades = ["1학년", "2학년", "3학년", "4학년"];
+      const majors = ["공학계열", "인문계열", "사회계열", "자연계열", "예체능계열"];
+      const subjects = ["Python 프로그래밍", "자료구조", "알고리즘", "미적분", "영어 회화", "생물학", "역사", "물리학", "화학", "웹 개발"];
+      const videoLengthOptions = [
+        { label: "쇼츠", desc: "1–3분" },
+        { label: "일반 영상", desc: "10–20분" },
+        { label: "혼합", desc: "모두" }
+      ];
+      const stepTitles = ["학년을 선택하세요","전공 계열을 선택해주세요","관심 과목을 선택해주세요","선호하는 영상 길이를 선택하세요","주간 학습 목표를 설정하세요"];
+      const stepDescriptions = ["수준에 맞는 콘텐츠를 추천해드립니다.","관련 분야의 학습 영상을 찾아드립니다.","최대 3개까지 선택 가능","학습 스타일에 맞게 선택하세요.","주당 몇 시간 학습할 계획인가요?"];
+
+      let html = `
+        <div class="onboarding-screen">
+          <div class="onboarding-container">
+            <div class="onboarding-logo">
+              <div class="logo-content">
+                <div class="logo-emoji">🎓</div>
+                <div class="logo-text">러닝큐</div>
+              </div>
+              <p class="logo-tagline">모든 학생을 위한 개인화된 학습</p>
+            </div>
+
+            <div class="progress-bar">
+      `;
+      for (let i=0;i<5;i++){
+        html += `<div class="progress-step ${i <= appState.onboardingStep ? 'active' : ''}"></div>`;
+      }
+      html += `<div class="card" id="onboardingCard">`;
+
+      // Step 0
+      if (appState.onboardingStep === 0){
+        html += `<h2 class="step-title">${stepTitles[0]}</h2><p class="step-description">${stepDescriptions[0]}</p><div id="gradeOptions">`;
+        grades.forEach(g => html += `<button class="option-button" data-value="${g}">${g}</button>`);
+        html += `</div>`;
+      }
+      // Step 1
+      if (appState.onboardingStep === 1){
+        html += `<h2 class="step-title">${stepTitles[1]}</h2><p class="step-description">${stepDescriptions[1]}</p><div id="majorOptions">`;
+        majors.forEach(m => html += `<button class="option-button" data-value="${m}">${m}</button>`);
+        html += `</div>`;
+      }
+      // Step 2: subjects (chip)
+      if (appState.onboardingStep === 2){
+        html += `<h2 class="step-title">${stepTitles[2]}</h2><p class="step-description">${stepDescriptions[2]} (0/3)</p><div class="chip-container" id="subjectChips">`;
+        subjects.forEach(s => html += `<button class="chip" data-value="${s}">${s}</button>`);
+        html += `</div>`;
+      }
+      // Step 3
+      if (appState.onboardingStep === 3){
+        html += `<h2 class="step-title">${stepTitles[3]}</h2><p class="step-description">${stepDescriptions[3]}</p><div id="videoLengthOptions">`;
+        videoLengthOptions.forEach(opt => html += `<button class="option-button" data-value="${opt.label}"><div>${opt.label}</div><div class="option-button-secondary">${opt.desc}</div></button>`);
+        html += `</div>`;
+      }
+      // Step 4
+      if (appState.onboardingStep === 4){
+        html += `<h2 class="step-title">${stepTitles[4]}</h2><p class="step-description">${stepDescriptions[4]}</p>
+                 <div class="slider-container">
+                   <div class="slider-display"><span class="slider-value"><span id="goalValue">5</span>시간</span><span class="slider-max">/ 20시간</span></div>
+                   <input type="range" min="1" max="20" value="5" id="weeklyGoalSlider" class="slider">
+                   <div class="slider-labels"><span>1</span><span>5</span><span>10</span><span>15</span><span>20</span></div>
+                 </div>`;
+      }
+
+      html += `
+    <div class="button-group">
+      <button class="btn btn-secondary" id="prevBtn" ${appState.onboardingStep === 0 ? 'disabled' : ''}>이전</button>
+      ${appState.onboardingStep < 4 ? `<button class="btn btn-primary" id="nextBtn" disabled>다음</button>` : `<button class="btn btn-primary" id="nextBtn">시작하기</button>`}
+    </div>
+  </div>  <!-- 카드 종료 -->
+</div>     <!-- 온보딩 컨테이너 -->
+`;
+
+
+      return html;
+    }
+
+    function setupOnboardingListeners() {
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+
+      prevBtn.addEventListener('click', () => {
+        if (appState.onboardingStep > 0) {
+          appState.onboardingStep--;
+          renderScreen();
+        }
+      });
+
+      nextBtn.addEventListener('click', async () => {
+        if (appState.onboardingStep < 4) {
+          appState.onboardingStep++;
+          renderScreen();
+        } else {
+          // Finish onboarding: save profile + build recommendations via API
+          if (appState.tempProfile) {
+            const profileToSave = {
+              ...appState.tempProfile,
+              weeklyGoal: appState.weeklyGoal || 5,
+              createdAt: new Date().toISOString()
+            };
+            localStorage.setItem('userProfile', JSON.stringify(profileToSave));
+            appState.userProfile = profileToSave;
+            appState.hasProfile = true;
+            appState.onboardingStep = 0;
+            appState.currentTab = 'home';
+
+            // Build recommendations (API) based on selected subjects
+            const subjects = profileToSave.subjects || [];
+            if (subjects.length > 0) {
+              // show temporary loading UI
+              document.getElementById('app').innerHTML = `<div style="padding:2rem;"><p>추천 영상을 생성 중입니다… (YouTube API)</p></div>`;
+              const recs = await buildRecommendations(subjects);
+              // save recommendations in localStorage optionally
+              localStorage.setItem('recommendations', JSON.stringify(recs));
+            }
+            renderScreen();
+          }
+        }
+      });
+
+      // Step-specific listeners
+      if (appState.onboardingStep === 0) {
+        document.querySelectorAll('#gradeOptions .option-button').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            document.querySelectorAll('#gradeOptions .option-button').forEach(b => b.classList.remove('selected'));
+            e.currentTarget.classList.add('selected');
+            appState.tempProfile = { ...appState.tempProfile, grade: e.currentTarget.dataset.value };
+            nextBtn.disabled = false;
+          });
+        });
+      } else if (appState.onboardingStep === 1) {
+        document.querySelectorAll('#majorOptions .option-button').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            document.querySelectorAll('#majorOptions .option-button').forEach(b => b.classList.remove('selected'));
+            e.currentTarget.classList.add('selected');
+            appState.tempProfile = { ...appState.tempProfile, major: e.currentTarget.dataset.value };
+            nextBtn.disabled = false;
+          });
+        });
+      } else if (appState.onboardingStep === 2) {
+        let selectedSubjects = [];
+        document.querySelectorAll('#subjectChips .chip').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const subject = e.currentTarget.dataset.value;
+            if (selectedSubjects.includes(subject)) {
+              selectedSubjects = selectedSubjects.filter(s => s !== subject);
+              e.currentTarget.classList.remove('selected');
+            } else if (selectedSubjects.length < 3) {
+              selectedSubjects.push(subject);
+              e.currentTarget.classList.add('selected');
+            }
+            // update description count
+            const descEl = document.getElementById('subjectChips').previousElementSibling;
+            if (descEl) descEl.textContent = `관심 과목을 선택해주세요 (${selectedSubjects.length}/3)`;
+            appState.tempProfile = { ...appState.tempProfile, subjects: selectedSubjects };
+            nextBtn.disabled = selectedSubjects.length === 0;
+          });
+        });
+      } else if (appState.onboardingStep === 3) {
+        document.querySelectorAll('#videoLengthOptions .option-button').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            document.querySelectorAll('#videoLengthOptions .option-button').forEach(b => b.classList.remove('selected'));
+            e.currentTarget.classList.add('selected');
+            appState.tempProfile = { ...appState.tempProfile, videoLength: e.currentTarget.dataset.value };
+            nextBtn.disabled = false;
+          });
+        });
+      } else if (appState.onboardingStep === 4) {
+        const slider = document.getElementById('weeklyGoalSlider');
+        const goalValue = document.getElementById('goalValue');
+        slider.addEventListener('input', (e) => {
+          appState.weeklyGoal = parseInt(e.target.value);
+          goalValue.textContent = appState.weeklyGoal;
+        });
+      }
+    }
+
+    /***********************
+     * Home: 추천 목록을 appState.recommendations에서 렌더
+     ***********************/
+    function renderHome() {
+      const recs = appState.recommendations || [];
+      let shown = recs.slice();
+
+      // tab filter
+      if (appState.filterTab === '쇼츠') shown = recs.filter(v => v.length === 'short-form');
+      else if (appState.filterTab === '중간 영상') shown = recs.filter(v => v.length === 'mid-form');
+      else if (appState.filterTab === '장편') shown = recs.filter(v => v.length === 'long-form');
+
+      // Build HTML
+      let html = `
+        <div class="header">
+          <div class="header-content">
+            <div class="header-emoji">🎓</div>
+            <h1 class="header-title">러닝큐</h1>
+          </div>
+          <button class="header-emoji" style="background:none;border:none;cursor:pointer;font-size:1.25rem;">👤</button>
+        </div>
+
+        <div class="filter-tabs">
+          ${['전체','쇼츠','중간 영상','장편'].map(f => `<button class="filter-tab ${f===appState.filterTab?'active':''}" data-filter="${f}">${f}</button>`).join('')}
+        </div>
+
+        <div style="padding:1rem;">
+      `;
+      
+
+      // If no recommendations yet (e.g., API not run or no results), show message and fallback suggestion
+      if (!recs || recs.length === 0) {
+        html += `<div class="stat-card"><h3 class="stat-card-title">추천 영상 생성 전입니다</h3><p style="color:#6b7280">온보딩에서 관심 과목을 선택한 뒤 '시작하기'를 누르면 AI가 유튜브에서 영상을 찾아 추천합니다. (API 키 필요)</p></div>`;
+      }
+
+      // Render video cards
+      shown.forEach(v => {
+        const isLiked = appState.likedVideos.includes(v.id);
+        const badgeMap = { 'short-form': {label:'쇼츠'}, 'mid-form': {label:'중간 영상'}, 'long-form': {label:'장편'} };
+        const badge = badgeMap[v.length] || {label:'영상'};
+        html += `
+          <div class="video-card">
+            <div class="video-thumbnail">
+              <img src="${v.thumbnail}" alt="${escapeHtml(v.title)}" onerror="this.src='https://via.placeholder.com/640x360?text=No+Image'">
+              <div class="play-overlay">
+                <button class="play-button" data-video-id="${v.youtubeId}" data-recid="${v.id}" data-video-title="${escapeAttr(v.title)}" data-duration="${v.durationMin}" onclick="playVideo(this)">▶</button>
+              </div>
+              <div class="video-duration">${v.durationMin}분</div>
+            </div>
+            <div class="video-content">
+              <div class="video-meta"><span>${escapeHtml(v.channelName)}</span><span>${escapeHtml(v.uploadedDate)}</span></div>
+              <h3 class="video-title">${escapeHtml(v.title)}</h3>
+              <div class="video-badge"><span>${badge.label}</span></div>
+              <div class="video-summary-box">
+                <button class="summary-toggle" onclick="toggleSummary(this)">▶ 3줄 요약</button>
+                <div class="summary-text">${escapeHtml(v.summary || '')}</div>
+              </div>
+              <div class="video-actions">
+                <button class="like-button ${isLiked ? 'liked' : ''}" data-video-id="${v.id}" onclick="likeVideo('${v.id}')">❤️ <span>${v.likes || 0}</span></button>
+                <button class="watch-button" data-video-id="${v.youtubeId}" data-video-title="${escapeAttr(v.title)}" data-duration="${v.durationMin}" onclick="playVideo(this)">재생하기</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div>`; // padding wrapper
+      return html;
+    }
+
+    function setupHomeListeners() {
+      document.querySelectorAll('.filter-tab').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          appState.filterTab = e.currentTarget.dataset.filter;
+          renderScreen();
+        });
+      });
+    }
+
+    /***********************
+     * Player / Like / Stats (원본 로직 유지, API 비디오 id 사용)
+     ***********************/
+    function playVideo(el) {
+      // Accept either element or node
+      const node = (el instanceof Element) ? el : el.target;
+      const youtubeId = node.dataset.videoId || node.getAttribute('data-video-id');
+      const title = node.dataset.videoTitle || node.getAttribute('data-video-title') || '';
+      const durationMin = parseInt(node.dataset.duration || node.getAttribute('data-duration') || '0', 10);
+
+      // show modal player
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.id = 'videoModal';
+      modal.innerHTML = `
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 style="flex:1;font-size:.875rem;font-weight:600;">영상 재생</h2>
+            <button class="modal-close-button" onclick="closeVideoModal()">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="youtube-embed">
+              <iframe src="https://www.youtube.com/embed/${youtubeId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+            <div class="video-info">
+              <h3 class="video-info-title">${escapeHtml(title)}</h3>
+              <p class="video-info-detail">재생 중...</p>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      modal.addEventListener('click', (e) => { if (e.target === modal) closeVideoModal(); });
+
+      // Save learning record: use synthetic id if available
+      // find matching recommendation entry to get rec id
+      const rec = appState.recommendations.find(r => r.youtubeId === youtubeId);
+      const recId = rec ? rec.id : genId('rec');
+
+      saveLearningRecord({
+        videoId: recId,
+        videoTitle: title,
+        watchedAt: new Date().toISOString(),
+        duration: durationMin, // minutes
+        completed: true
+      });
+
+      appState.learningStats = getLearningStats();
+      renderScreen();
+    }
+
+    function closeVideoModal() {
+      const m = document.getElementById('videoModal');
+      if (m) m.remove();
+    }
+
+    function likeVideo(videoId) {
+      // toggles like for synthetic id
+      if (appState.likedVideos.includes(videoId)) {
+        appState.likedVideos = appState.likedVideos.filter(id => id !== videoId);
+      } else {
+        appState.likedVideos.push(videoId);
+      }
+      localStorage.setItem('likedVideos', JSON.stringify(appState.likedVideos));
+
+      // update stats store
+      const stats = getLearningStats();
+      stats.totalLikedVideos = appState.likedVideos.length;
+      localStorage.setItem('learningStats', JSON.stringify(stats));
+      appState.learningStats = stats;
+
+      renderScreen();
+    }
+
+    function toggleSummary(btn) {
+      const st = btn.nextElementSibling;
+      if (!st) return;
+      if (st.style.display === 'block') {
+        st.style.display = 'none';
+        btn.textContent = '▶ 3줄 요약';
+      } else {
+        st.style.display = 'block';
+        btn.textContent = '▼ 3줄 요약';
+      }
+    }
+
+    function logout() {
+      if (confirm('로그아웃하시겠습니까?')) {
+        localStorage.removeItem('userProfile');
+        appState.hasProfile = false;
+        appState.userProfile = null;
+        appState.onboardingStep = 0;
+        appState.currentTab = 'home';
+        appState.recommendations = [];
+        renderScreen();
+      }
+    }
+
+    /***********************
+     * Learning Stats (원본 유지)
+     ***********************/
+    function getLearningStats() {
+      const stored = localStorage.getItem('learningStats');
+      if (!stored) {
+        return { totalWatchedVideos: 0, totalLikedVideos: appState.likedVideos.length, totalWatchedHours: 0, dailyStats: {}, categoryStats: {}, learningHistory: [] };
+      }
+      const stats = JSON.parse(stored);
+      stats.totalLikedVideos = appState.likedVideos.length;
+      return stats;
+    }
+
+    function saveLearningRecord(record) {
+      const stats = getLearningStats();
+      stats.learningHistory.push(record);
+      stats.totalWatchedVideos = stats.learningHistory.length;
+      const hours = (record.duration || 0) / 60;
+      stats.totalWatchedHours = (stats.totalWatchedHours || 0) + hours;
+
+      const today = new Date().toISOString().split('T')[0];
+      stats.dailyStats[today] = (stats.dailyStats[today] || 0) + hours;
+
+      localStorage.setItem('learningStats', JSON.stringify(stats));
+    }
+
+    function getWeeklyStats(stats) {
+      return Object.values(stats.dailyStats || {}).reduce((sum, h) => sum + h, 0);
+    }
+
+    /***********************
+     * Dashboard / Profile (원본 유지)
+     ***********************/
+    function renderDashboard() {
+      const stats = getLearningStats();
+      const userProfile = appState.userProfile || {};
+      const weeklyHours = getWeeklyStats(stats);
+      const progressPercent = Math.min((weeklyHours / (userProfile.weeklyGoal || 5)) * 100, 100);
+
+      let html = `
+        <div class="header">
+          <div class="header-content"><div class="header-emoji">🎓</div><h1 class="header-title">대시보드</h1></div>
+          <button class="header-emoji" style="background:none;border:none;cursor:pointer;font-size:1.25rem;">👤</button>
+        </div>
+        <div class="content-area scrollbar-hide">
+          <div class="dashboard-container">
+            <div class="stat-card">
+              <div class="progress-card">
+                <h3 class="stat-card-title">이번 주 학습 시간</h3>
+                <div class="stat-value">${weeklyHours.toFixed(1)}<span class="stat-unit">h</span></div>
+                <div class="progress-label"><span>주간 목표</span><span>${userProfile.weeklyGoal || 5}h</span></div>
+                <div class="progress-bar-container"><div class="progress-bar-fill" style="width:${progressPercent}%"></div></div>
+                <div class="progress-percent">${Math.round(progressPercent)}% 달성</div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <h3 class="stat-card-title">학습 활동</h3>
+              <div class="stat-grid">
+                <div class="stat-grid-item blue">
+                  <div class="stat-grid-item-number">${stats.totalWatchedVideos}</div>
+                  <div class="stat-grid-item-label">완료한 영상</div>
+                </div>
+                <div class="stat-grid-item purple">
+                  <div class="stat-grid-item-number">${stats.totalLikedVideos}</div>
+                  <div class="stat-grid-item-label">좋아요한 영상</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <h3 class="stat-card-title">총 학습 시간</h3>
+              <div class="stat-value">${(stats.totalWatchedHours || 0).toFixed(1)}<span class="stat-unit">h</span></div>
+            </div>
+
+            <div class="stat-card">
+              <h3 class="stat-card-title">최근 학습 이력</h3>
+              ${stats.learningHistory.length === 0 ? `<p style="font-size:.75rem;color:#6b7280;text-align:center;padding:1rem 0;">학습 이력이 없습니다</p>` : `<div class="history-list">${stats.learningHistory.slice(-5).reverse().map(record => `<div class="history-item"><div><div class="history-item-title">${escapeHtml(record.videoTitle)}</div><div class="history-item-date">${new Date(record.watchedAt).toLocaleDateString()}</div></div><span class="history-item-time">${((record.duration||0)/60).toFixed(1)}h</span></div>`).join('')}</div>`}
+            </div>
+
+            <div class="motivation-banner">
+              <p class="motivation-title">${stats.totalWatchedVideos > 0 ? '멋진 학습을 계속하세요!' : '첫 번째 영상을 시청해보세요!'}</p>
+              <p class="motivation-subtitle">${stats.totalWatchedVideos > 0 ? `${stats.totalWatchedVideos}개의 영상을 학습했습니다.` : '새로운 학습 여정을 시작하세요.'}</p>
+            </div>
+          </div>
+        </div>
+      `;
+      return html;
+    }
+
+    function renderProfile() {
+      const stats = getLearningStats();
+      const profile = appState.userProfile || {};
+      let html = `
+        <div class="header">
+          <div class="header-content"><div class="header-emoji">🎓</div><h1 class="header-title">프로필</h1></div>
+          <button class="header-emoji" style="background:none;border:none;cursor:pointer;font-size:1.25rem;">👤</button>
+        </div>
+        <div class="content-area scrollbar-hide">
+          <div class="profile-container">
+            <div class="stat-card profile-header">
+              <div style="display:flex;gap:1rem;align-items:center">
+                <div style="width:4rem;height:4rem;border-radius:9999px;background:rgba(14,165,233,0.2);display:flex;align-items:center;justify-content:center;font-size:1.875rem;">👤</div>
+                <div>
+                  <div style="font-size:1.125rem;font-weight:700;color:#111827">${escapeHtml(profile.grade || '정보없음')}</div>
+                  <div style="font-size:.875rem;color:#4b5563">${escapeHtml(profile.major || '정보없음')} 전공</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <h3 class="stat-card-title">학과 정보</h3>
+              <div class="info-group">
+                <div class="info-item"><span class="info-label">학년</span><span class="info-value">${escapeHtml(profile.grade || '-')}</span></div>
+                <div class="info-item"><span class="info-label">전공</span><span class="info-value">${escapeHtml(profile.major || '-')}</span></div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <h3 class="stat-card-title">학습 선호도</h3>
+              <div class="info-group">
+                <div class="info-item"><span class="info-label">선호하는 영상 길이</span><span class="info-value">${escapeHtml(profile.videoLength || '-')}</span></div>
+                <div class="info-item"><span class="info-label">주간 학습 목표</span><div class="goal-display"><span class="goal-number">${profile.weeklyGoal || 5}</span><span class="goal-unit">시간/주</span></div></div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <h3 class="stat-card-title">관심 과목</h3>
+              <div class="subject-tags">
+                ${(profile.subjects || []).map(subject => `<div class="subject-tag" style="padding:.375rem .75rem;border-radius:9999px;background:rgba(14,165,233,0.2);color:#0ea5e9;font-size:.75rem;font-weight:500;">${escapeHtml(subject)}</div>`).join('')}
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <h3 class="stat-card-title">학습 통계</h3>
+              <div class="stat-grid">
+                <div class="stat-grid-item blue"><div class="stat-grid-item-number">${stats.totalWatchedVideos}</div><div class="stat-grid-item-label">완료한 영상</div></div>
+                <div class="stat-grid-item purple"><div class="stat-grid-item-number">${stats.totalLikedVideos}</div><div class="stat-grid-item-label">좋아요한 영상</div></div>
+              </div>
+              <div style="margin-top:1rem;">
+                <div style="padding:1rem;border-radius:.5rem;background:#ecfdf5">
+                  <div style="font-size:1.875rem;font-weight:700;color:#06b6d4">${(stats.totalWatchedHours||0).toFixed(1)}</div>
+                  <div style="font-size:.75rem;color:#4b5563">총 학습 시간 (h)</div>
+                </div>
+              </div>
+            </div>
+
+            ${stats.learningHistory.length > 0 ? `<div class="stat-card"><h3 class="stat-card-title">최근 학습 이력</h3><div class="history-list">${stats.learningHistory.slice(-5).reverse().map(record => `<div class="history-item"><div><div class="history-item-title">${escapeHtml(record.videoTitle)}</div><div class="history-item-date">${new Date(record.watchedAt).toLocaleDateString()}</div></div><span class="history-item-time">${((record.duration||0)/60).toFixed(1)}h</span></div>`).join('')}</div></div>` : ''}
+
+            <button class="logout-button" onclick="logout()">🚪 로그아웃</button>
+          </div>
+        </div>
+      `;
+      return html;
+    }
+
+    function setupProfileListeners() {
+      // 확장용
+    }
+
+    /***********************
+     * Utilities
+     ***********************/
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[s]);
+    }
+    function escapeAttr(str) { return (str||'').replace(/"/g,'&quot;').replace(/'/g,"&#39;"); }
+
+    /***********************
+     * 시작
+     ***********************/
+    window.addEventListener('load', () => {
+      loadUserProfile();
+      initApp();
+    });
+
+  </script>
+</body>
+</html>
